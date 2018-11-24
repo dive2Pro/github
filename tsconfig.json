@@ -12,10 +12,14 @@
       "*": [
         "node_modules/*",
         "src/types/*"
+      ],
+      "models/*": [
+        "src/models/*"
       ]
     }
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/**/*"
   ]
 }
