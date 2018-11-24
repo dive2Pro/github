@@ -1,23 +1,41 @@
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express from 'express'
+import mongoose from 'mongoose'
+import expressValidator from 'express-validator'
+import routes from './routes'
 
 const app = express()
-const body_parser_secrect = 'body-parser'
+const env = app.get('env')
+let router = ''
+let dbName = 'github'
+if (env === 'test') {
+    router = '/'
+    dbName = 'github_test'
+} else {
+    router = '/api'
+}
+const mongoDB = 'mongodb://127.0.0.1:27017/' + dbName
 
-const pre_middlewares = [
+mongoose
+    .connect(mongoDB)
+    .then(() => {
+        console.log('Connected Mongo! ')
+    })
+    .catch(err => {
+        console.error('Mongo connection was failed, ', err)
+    })
+
+const pre_middleware = [
     bodyParser({
         extended: false
     }),
-    cookieParser()
+    cookieParser(),
+    expressValidator()
 ]
 
-pre_middlewares.forEach(m => app.use(m));
+pre_middleware.forEach(m => app.use(m))
 
-
-app.get('/api', (req, res, next) => {
-    res.writeHead(200)
-    res.end()
-})
+app.use(router, routes)
 
 export default app
