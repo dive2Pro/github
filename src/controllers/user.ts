@@ -1,5 +1,7 @@
 import { RequestHandler } from 'express'
 import { body, validationResult, check } from 'express-validator/check'
+import passport from 'passport'
+
 import User from '../models/User'
 
 export let login: RequestHandler[] = [
@@ -18,14 +20,16 @@ export let login: RequestHandler[] = [
         if (!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() })
         }
-        User.findOne(req.body).exec((err, doc) => {
+        passport.authenticate('local', (err, user, info) => {
             if (err) {
-                next(err)
-            } else if (!doc) {
-                res.status(403).json('用户名或者密码错误')
-            } else {
-                res.status(200).json(doc)
+                return next(err)
             }
-        })
+
+            if (!user) {
+                return res.status(403).json(info)
+            }
+
+            res.status(200).json(user)
+        })(req, res, next)
     }
 ]

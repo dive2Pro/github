@@ -3,8 +3,11 @@ import cookieParser from 'cookie-parser'
 import express from 'express'
 import mongoose from 'mongoose'
 import expressValidator from 'express-validator'
+import passport from 'passport'
 import routes from './routes'
+import * as passportConfig from './config/passport'
 
+console.log(passportConfig)
 const app = express()
 const env = app.get('env')
 let router = ''
@@ -31,7 +34,9 @@ const pre_middleware = [
         extended: false
     }),
     cookieParser(),
-    expressValidator()
+    expressValidator(),
+    passport.initialize(),
+    passport.session()
 ]
 
 pre_middleware.forEach(m => app.use(m))
