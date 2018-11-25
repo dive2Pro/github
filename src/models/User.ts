@@ -1,4 +1,4 @@
-import { Schema, Document, Error, model } from 'mongoose'
+import {Schema, Document, Error, model} from 'mongoose'
 import bcrypt from 'bcrypt-nodejs'
 
 type comparePasswordFunction = (
@@ -34,6 +34,28 @@ const comparePassword: comparePasswordFunction = function(
         }
     )
 }
+
+userSchema.pre('save', function save(next: (e?: any) => {}) {
+    const user = <UserModel>this;
+
+    if(!user.isModified('password')) {
+        return next()
+    }
+
+    bcrypt.genSalt(10, (err, salt) => {
+        if(err) {
+         return  next(err)
+        }
+
+        bcrypt.hash(user.password, salt, undefined, (err, hash) => {
+            if(err) {
+                return next(err)
+            }
+            user.password = hash
+            next()
+        })
+    })
+})
 
 userSchema.methods.comparePassword = comparePassword
 

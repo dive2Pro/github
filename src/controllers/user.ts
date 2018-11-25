@@ -2,8 +2,6 @@ import { RequestHandler } from 'express'
 import { body, validationResult, check } from 'express-validator/check'
 import passport from 'passport'
 
-import User from '../models/User'
-
 export let login: RequestHandler[] = [
     body('email')
         .isEmail()
@@ -29,7 +27,16 @@ export let login: RequestHandler[] = [
                 return res.status(403).json(info)
             }
 
-            res.status(200).json(user)
+            req.logIn(user, err => {
+                if(err) {
+                    return next(err)
+                }
+
+                console.log(req.user)
+                console.log(req.session)
+                res.status(200).json(user)
+            })
+
         })(req, res, next)
     }
 ]

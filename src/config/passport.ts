@@ -1,6 +1,16 @@
 import passport from 'passport'
 import passportLocal from 'passport-local'
-import User, { UserModel } from '../models/user'
+import User, { UserModel } from '../models/User'
+
+passport.serializeUser<any, any>((user, done) => {
+    done(undefined, user.id)
+})
+
+passport.deserializeUser((id, done) => {
+    User.findById(id, (err, user) => {
+        done(err, user)
+    })
+})
 
 /**
  * 为了 Github 或者其他的第三方登录,  passport 已经有配套的 repo 来处理

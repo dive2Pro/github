@@ -1,12 +1,15 @@
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express from 'express'
+import expressSession from 'express-session'
+import mongo from 'connect-mongo'
 import mongoose from 'mongoose'
 import expressValidator from 'express-validator'
 import passport from 'passport'
 import routes from './routes'
 import * as passportConfig from './config/passport'
 
+const MongoStore = mongo(expressSession)
 console.log(passportConfig)
 const app = express()
 const env = app.get('env')
@@ -18,7 +21,8 @@ if (env === 'test') {
 } else {
     router = '/api'
 }
-const mongoDB = 'mongodb://127.0.0.1:27017/' + dbName
+const mongoUrl = 'mongodb://127.0.0.1:27017/'
+const mongoDB = mongoUrl + dbName
 
 mongoose
     .connect(mongoDB)
@@ -35,6 +39,13 @@ const pre_middleware = [
     }),
     cookieParser(),
     expressValidator(),
+    expressSession({
+        secret: '-sec-ret',
+        store: new MongoStore({
+            url: mongoUrl,
+            autoReconnect: true
+        })
+    }),
     passport.initialize(),
     passport.session()
 ]
