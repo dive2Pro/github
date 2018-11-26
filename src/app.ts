@@ -62,6 +62,7 @@ app.all('*', (req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type')
     next()
 })
+
 app.use(router, routes)
 
 export default app
