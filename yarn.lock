@@ -92,6 +92,11 @@
   version "23.3.9"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-23.3.9.tgz#c16b55186ee73ae65e001fbee69d392c51337ad1"
 
+"@types/methods@^1.1.0":
+  version "1.1.0"
+  resolved "http://registry.npm.taobao.org/@types/methods/download/@types/methods-1.1.0.tgz#fa0c8c81992257903f724651ec2500ec427dc32d"
+  integrity sha1-+gyMgZkiV5A/ckZR7CUA7EJ9wy0=
+
 "@types/mime@*":
   version "2.0.0"
   resolved "http://registry.npm.taobao.org/@types/mime/download/@types/mime-2.0.0.tgz#5a7306e367c539b9f6543499de8dd519fac37a8b"

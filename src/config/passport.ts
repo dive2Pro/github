@@ -60,7 +60,7 @@ passport.use(
         {
             clientID: CLIENT_ID,
             clientSecret: CLIENT_SECRET,
-            scope: ['user'],
+            scope: ['user', 'repo'],
             callbackURL: '/api/return'
         },
         async (accessToken, refreshToken, profile: any, cb) => {

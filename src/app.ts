@@ -49,10 +49,6 @@ const pre_middleware = [
     passport.initialize(),
     passport.session()
 ]
-app.use((req, res, next) => {
-    res.locals.user = req.user
-    next()
-})
 
 pre_middleware.forEach(m => app.use(m))
 
@@ -63,6 +59,7 @@ app.all('*', (req, res, next) => {
     next()
 })
 
+// todo 添加白名单, 其他的都需要登录信息
 app.use(router, routes)
 
 export default app

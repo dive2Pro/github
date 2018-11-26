@@ -2,6 +2,7 @@ import express from 'express'
 import * as userControllers from './controllers/user'
 import passport from 'passport'
 const routes = express.Router()
+import * as repoControllers from './controllers/repo'
 
 routes.get('/', (req, res, next) => {
     res.writeHead(200)
@@ -9,24 +10,26 @@ routes.get('/', (req, res, next) => {
 })
 
 routes.post('/login', userControllers.login)
-// routes.get('/authenticate/:code', userControllers.authenticate)
-
 routes.get(
     '/login/github',
     passport.authenticate('github', {
         failureRedirect: '/api'
     })
 )
-
 routes.get(
     '/return',
     passport.authenticate('github', {
         failureRedirect: '/api'
     }),
     (req, res) => {
-        return res.redirect(
-            `http://localhost:3000/players/${req.user.id}`
-        )
+        return res.redirect(`http://localhost:3000/players/${req.user.id}`)
     }
 )
+
+/**
+ * repos
+ */
+routes.get('/repos', repoControllers.repos)
+routes.get('/repos/:id', repoControllers.repo)
+
 export default routes

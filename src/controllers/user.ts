@@ -1,8 +1,6 @@
-import { NextFunction, RequestHandler } from 'express'
-import { body, validationResult, check } from 'express-validator/check'
+import { RequestHandler } from 'express'
+import { body, validationResult} from 'express-validator/check'
 import passport from 'passport'
-import request from 'superagent'
-import User from '../models/User'
 
 export let login: RequestHandler[] = [
     body('email')
