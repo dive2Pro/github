@@ -49,9 +49,19 @@ const pre_middleware = [
     passport.initialize(),
     passport.session()
 ]
+app.use((req, res, next) => {
+    res.locals.user = req.user
+    next()
+})
 
 pre_middleware.forEach(m => app.use(m))
 
+app.all('*', (req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*')
+    res.header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+    res.header('Access-Control-Allow-Headers', 'Content-Type')
+    next()
+})
 app.use(router, routes)
 
 export default app

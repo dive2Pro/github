@@ -4,10 +4,11 @@ const routes = express.Router()
 
 routes.get('/', (req, res, next) => {
     res.writeHead(200)
-    res.end()
+    res.end(`<h1>Welcome api </h1>`)
 })
 
+
 routes.post('/login', userControllers.login)
-routes.post('/login', () => {})
+routes.get('/authenticate/:code', userControllers.authenticate)
 
 export default routes

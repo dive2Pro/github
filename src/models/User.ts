@@ -1,4 +1,4 @@
-import {Schema, Document, Error, model} from 'mongoose'
+import { Schema, Document, Error, model } from 'mongoose'
 import bcrypt from 'bcrypt-nodejs'
 
 type comparePasswordFunction = (
@@ -6,10 +6,24 @@ type comparePasswordFunction = (
     cb: (err: Error, isMatch: Boolean) => void
 ) => void
 
+export type AccessToken = {
+    kind: string
+    accessTken: string
+}
 export type UserModel = Document & {
     email: string
     password: string
     comparePassword: comparePasswordFunction
+
+    github: string
+
+    tokens: AccessToken[]
+    profile: {
+        name: string
+        picture: string
+        location: string
+        website: string
+    }
 }
 
 const userSchema = new Schema(
@@ -17,7 +31,15 @@ const userSchema = new Schema(
         // 手机也可作为key 值
         email: { type: String, unique: true },
         // 可以通过 Oauth 第三方登录, 所以不是必须的
-        password: { type: String }
+        password: { type: String },
+        github: String,
+        tokens: Array,
+        profile: {
+            name: String,
+            picture: String,
+            location: String,
+            website: String
+        }
     },
     { timestamps: true }
 )
@@ -35,20 +57,20 @@ const comparePassword: comparePasswordFunction = function(
     )
 }
 
-userSchema.pre('save', function save(next: (e?: any) => {}) {
-    const user = <UserModel>this;
+userSchema.pre('save', function save(next: any) {
+    const user = <UserModel>this
 
-    if(!user.isModified('password')) {
+    if (!user.isModified('password')) {
         return next()
     }
 
     bcrypt.genSalt(10, (err, salt) => {
-        if(err) {
-         return  next(err)
+        if (err) {
+            return next(err)
         }
 
         bcrypt.hash(user.password, salt, undefined, (err, hash) => {
-            if(err) {
+            if (err) {
                 return next(err)
             }
             user.password = hash
