@@ -1,3 +1,4 @@
+import dayjs from 'dayjs'
 import Schedule from '../schedule'
 
 describe('Schedule tests', () => {
@@ -41,5 +42,40 @@ describe('Schedule tests', () => {
             .run(callback)
         cb()
         expect(callback).toBeCalledTimes(1)
+    })
+
+    it('the start time must later than now', () => {
+        expect(() => {
+            schedule.setTime('2017-1-29')
+        }).toThrow()
+    })
+
+    // 这个测试需要修改 jest _fakeSetTimeout 这个函数的源码中关于 delay 的那一行
+    // it('monthly timer ', () => {
+    //     jest.useFakeTimers()
+    //     const callback = jest.fn()
+    //     const startDate = '2018-11-29'
+    //     const endDate = '2019-3-11'
+    //     schedule
+    //         .setTime(startDate)
+    //         .monthly()
+    //         .run(callback)
+    //     const diffms = dayjs(endDate).diff(dayjs(), 'millisecond')
+    //     jest.advanceTimersByTime(diffms)
+    //     expect(callback).toHaveBeenCalledTimes(4)
+    // })
+
+    it('daily timer ', () => {
+        jest.useFakeTimers()
+        const callback = jest.fn()
+        const startDate = '2019-2-27'
+        const endDate = '2019-3-1 23:59:59'
+        schedule
+            .setTime(startDate)
+            .daily()
+            .run(callback)
+        const diffms = dayjs(endDate).diff(dayjs(), 'millisecond')
+        jest.advanceTimersByTime(diffms)
+        expect(callback).toHaveBeenCalledTimes(3)
     })
 })

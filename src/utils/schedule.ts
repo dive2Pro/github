@@ -26,17 +26,28 @@ export default class Schedule {
      * @param startTime - 以这个时间点为起点
      */
     constructor(startTime?: dayjs.ConfigType) {
-        this.startTime = startTime && dayjs(startTime)
+        if (startTime) {
+            this.setStartTime(startTime)
+        }
         this.repeatMode = Schedule.RepeatMode.Times
         this.repeatDuration = 0
+    }
+    private setStartTime(startTime: dayjs.ConfigType) {
+        assert(
+            dayjs().valueOf() < dayjs(startTime).valueOf(),
+            '设定的时间必须大于当前的时间'
+        )
+        this.startTime = dayjs(startTime)
     }
 
     private checkRunning() {
         assert(this.isRunning === false, '定时器已启动')
     }
+
     setTime(startTime: dayjs.ConfigType) {
         this.checkRunning()
-        this.startTime = dayjs(startTime)
+        this.setStartTime(startTime)
+        return this
     }
 
     seconds(value: number) {
@@ -99,17 +110,36 @@ export default class Schedule {
             }
             self.isRunning = false
         }
-        async function _repeat(count: number, duration: number) {
+        function _timesRepeat(
+            count: number,
+            duration: number = self.repeatDuration
+        ) {
             self.isRunning = true
             if (count <= 0) {
                 clearFunction()
                 return
             }
+
             timer = setTimeout(() => {
-                cb()
-                _repeat(count - 1, duration)
-            }, self.nextDuration(duration))
+                cb && cb()
+                _timesRepeat(count - 1)
+            }, duration)
         }
+
+        function _repeat(duration?: number) {
+            self.isRunning = true
+            let nextDuration = duration,
+                nextDayjs
+            if (!nextDuration) {
+                ;[nextDuration, nextDayjs] = self.nextDuration(self.startTime)
+                self.startTime = nextDayjs
+            }
+            timer = setTimeout(() => {
+                cb && cb()
+                _repeat()
+            }, nextDuration)
+        }
+
         if (this.repeatMode === Schedule.RepeatMode.Times) {
             const { repeatTimes } = this
             if (repeatTimes <= 0) {
@@ -123,23 +153,23 @@ export default class Schedule {
                     this.startTime,
                     'millisecond'
                 )
-                _repeat(this.repeatTimes, firstDuration)
+                _timesRepeat(this.repeatTimes, firstDuration)
             } else {
-                _repeat(this.repeatTimes, duration)
+                _timesRepeat(this.repeatTimes)
             }
             return clearFunction
         }
 
-        if (startTime) {
-            console.error('请在初始化时设置时间')
+        if (!startTime) {
+            console.error('请设置初始时间')
         } else {
-            _repeat(Number.MAX_SAFE_INTEGER, this.nextDuration(this.startTime))
+            _repeat(this.startTime.diff(dayjs(), 'millisecond'))
         }
         return clearFunction
     }
 
-    private nextDuration(currentTime: dayjs.ConfigType) {
-        let nextDayjs
+    private nextDuration(currentTime: dayjs.ConfigType): [number, dayjs.Dayjs] {
+        let nextDayjs: dayjs.Dayjs
         const startDayjs = dayjs(currentTime)
         switch (this.repeatMode) {
             case Schedule.RepeatMode.Daily:
@@ -151,9 +181,8 @@ export default class Schedule {
             case Schedule.RepeatMode.Yearly:
                 nextDayjs = startDayjs.add(1, 'year')
                 break
-            case Schedule.RepeatMode.Times:
-                return this.repeatDuration
         }
-        return nextDayjs.diff(startDayjs, 'millisecond')
+        // console.log(nextDayjs.format('YYYY-MM-DD'))
+        return [nextDayjs.diff(startDayjs, 'millisecond'), nextDayjs]
     }
 }
