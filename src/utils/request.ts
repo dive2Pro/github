@@ -6,6 +6,9 @@ const requestConfig = (baseUrl: string) => {
         // @ts-ignore
         const originMethod = superagent[name]
         function newMethod(url: string) {
+            if (url.startsWith('http') || url.startsWith('https')) {
+                return originMethod(url)
+            }
             const fullUrl = baseUrl + url
             return originMethod(fullUrl)
         }

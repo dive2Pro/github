@@ -6,6 +6,7 @@ import mongo from 'connect-mongo'
 import mongoose from 'mongoose'
 import expressValidator from 'express-validator'
 import passport from 'passport'
+import triggerBackgroundTasks from  './background'
 import routes from './routes'
 import * as passportConfig from './config/passport'
 
@@ -27,6 +28,7 @@ const mongoDB = mongoUrl + dbName
 mongoose
     .connect(mongoDB)
     .then(() => {
+        triggerBackgroundTasks()
         console.log('Connected Mongo! ')
     })
     .catch(err => {
