@@ -1,5 +1,6 @@
 import express from 'express'
 import * as userControllers from './controllers/user'
+import * as trendingControllers from './controllers/trending'
 import passport from 'passport'
 const routes = express.Router()
 import * as repoControllers from './controllers/repo'
@@ -31,5 +32,11 @@ routes.get(
  */
 routes.get('/repos', repoControllers.repos)
 routes.get('/repos/:id', repoControllers.repo)
+
+/**
+ * trending
+ */
+
+routes.get('/trending', trendingControllers.trending)
 
 export default routes

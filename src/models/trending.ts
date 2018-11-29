@@ -31,21 +31,21 @@ const TrendingSchema = new Schema({
     date: Date,
     language: String,
     author: String,
-    name: String,
+    name: { type: String },
     url: String,
     languageColor: String,
     stars: Number,
     forks: Number,
     currentPeriodStars: Number,
-    builtBy: [
-        {
-            type: Schema.Types.ObjectId,
-            ref: 'BuiltBy'
-        }
-    ]
+    builtBy: [BuiltBySchema]
 })
 
 const builtBy = model('BuiltBy', BuiltBySchema)
 const trending = model('Trending', TrendingSchema)
 
-export { builtBy, trending }
+/**
+ * to add date field
+ */
+TrendingSchema.pre('init', () => {})
+
+export { builtBy, trending as Trending }

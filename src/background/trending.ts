@@ -1,11 +1,14 @@
 import dayjs from 'dayjs'
 import superagent from 'superagent'
-import { trending } from '../models/trending'
+import { Trending, TrendingModel } from '../models/trending'
 import Schedule from '../utils/schedule'
 
-const startDay = dayjs()
-    .endOf('day')
-    .format('YYYY-MM-DD HH:mm:ss')
+function endToday() {
+    const startDay = dayjs()
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+    return startDay
+}
 
 function request(lang: string, since: string) {
     const trendingUrl = `https://github-trending-api.now.sh/repositories?language=${lang}&since=${since}`
@@ -29,25 +32,62 @@ function request(lang: string, since: string) {
  *          要关联某些repo的字段, 比如 author, description, stars, forks等会比较麻烦
  *          无法作为前置条件来查询
  *  2. mongodb
+ *          需要 redis 配合来做缓存处理
  *
- * @param lang
+ *
+ * TODO:
+ *      1. 上榜最久
+ *      2. 每种语言的日增的 星总数
+ *      3. 各语言单日星最多的
+ *          - 为何会出现这种情况
+ *          - 关联大牛对此项目的评论
+ *          - 个人开发者对此项目的评论
+ * @param lang - 语言种类
+ * @param type - 查询的日期类型
  */
-async function queryTrending(lang: string) {
+async function queryTrending(lang: string, type: string) {
     try {
-        const response = await request(lang, 'daily')
-        console.log(response)
+        const { body } = await request(lang, 'daily')
+        let startDay = dayjs() // for test
+        const results = await Promise.all(
+            body.map(async (item: TrendingModel) => {
+                try {
+                    startDay = startDay.add(1, 'day')
+                    const result = await Trending.update(
+                        { name: item.name },
+                        {
+                            ...item,
+                            type,
+                            date: startDay.format() // TODO: remove , use scheme pre save hook
+                        },
+                        {
+                            upsert: true,
+                            new: true,
+                            setDefaultsOnInsert: true
+                        }
+                    )
+                    return result
+                } catch (e) {
+                    return {}
+                }
+            })
+        )
+        console.log('save %s trending!', lang)
+        return results
     } catch (e) {
         console.error('trending query count error: ', e)
     }
 }
 
 export default function trigger(langs: string[]) {
-    langs.forEach(s => {
+    return langs.map(s => {
         const clear = new Schedule()
-            .repeat(1)
-            .seconds(10)
-            .run(() => {
-                queryTrending(s)
+            // .daily()
+            .seconds(1)
+            .times(1)
+            .run(function() {
+                queryTrending(s, this.repeatMode)
             })
+        return clear
     })
 }

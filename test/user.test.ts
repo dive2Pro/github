@@ -63,8 +63,6 @@ describe('/login', () => {
                 const { body } = res
                 expect(err).toBeNull()
                 expect(body.email).toEqual(email)
-                // expect(body.password).toBeUndefined()
-                // expect(body.token).not.toBeNull()
                 done()
             })
     })

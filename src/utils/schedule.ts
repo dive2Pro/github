@@ -10,11 +10,11 @@ import Timeout = NodeJS.Timeout
  */
 export default class Schedule {
     private startTime: dayjs.Dayjs
-    private repeatMode: string | number
+    public repeatMode: string | number
     private repeatDuration: number // milliseconds
     private repeatTimes: number = 0
     private isRunning: boolean = false
-    private static RepeatMode = {
+    public static RepeatMode = {
         Daily: 'daily',
         Monthly: 'monthly',
         Yearly: 'yearly',
@@ -91,7 +91,7 @@ export default class Schedule {
         return this
     }
 
-    repeat(times: number) {
+    times(times: number) {
         this.changeMode(Schedule.RepeatMode.Times)
         this.repeatTimes = times
         return this
@@ -121,7 +121,7 @@ export default class Schedule {
             }
 
             timer = setTimeout(() => {
-                cb && cb()
+                cb && cb.call(self)
                 _timesRepeat(count - 1)
             }, duration)
         }
