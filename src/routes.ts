@@ -31,7 +31,16 @@ const authenticate = expressJwt({
     secret: secretKey,
     requestProperty: 'auth',
     getToken(req) {
-        return req.headers['x-auth-token']
+        let authHeader = req.headers['x-auth-token']
+        if (authHeader) {
+            authHeader = decodeURIComponent(authHeader.toString())
+            if (authHeader.toString().split(' ')[0] === 'Bearer') {
+                return authHeader.toString().split(' ')[1]
+            }
+        } else if (req.query && req.query.token) {
+            return req.query.token
+        }
+        return undefined
     }
 })
 
@@ -67,6 +76,6 @@ routes.get('/repos/:id', repoControllers.repo)
  * trending
  */
 
-routes.get('/trending', trendingControllers.trending)
+routes.get('/trending', authenticate, trendingControllers.trending)
 
 export default routes
