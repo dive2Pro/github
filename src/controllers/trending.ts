@@ -5,8 +5,9 @@ import { Trending, TrendingModel } from '../models/trending'
 export const trending: RequestHandler = (req, res, next) => {
     const { query = {} } = req
     const { dateRange = '', ...rest } = query
-    let dateQuery = {}
+    let dateQuery
     if (dateRange.length) {
+        dateQuery = {}
         try {
             const [start, end] = JSON.parse(dateRange).map((t: string) =>
                 new Date(t).toISOString()
@@ -27,7 +28,8 @@ export const trending: RequestHandler = (req, res, next) => {
             })
         }
     }
-    Trending.find({ ...rest, date: dateQuery }).exec(function(err, docs) {
+    const queryParams = dateQuery ? { ...rest, date: dateQuery } : rest
+    Trending.find(queryParams).exec(function(err, docs) {
         if (err) {
             next(err)
         } else {

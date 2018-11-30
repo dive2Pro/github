@@ -40,7 +40,7 @@ function request(lang: string, since: string) {
  *      2. 每种语言的日增的 星总数
  *      3. 各语言单日星最多的
  *          - 为何会出现这种情况
- *          - 关联大牛对此项目的评论
+ *          - 关联大牛对此项目的评论 (这一部分可以从 Twitter, 知乎 上面获取, 这一部分应该是 interval 来获取的)
  *          - 个人开发者对此项目的评论
  * @param lang - 语言种类
  * @param type - 查询的日期类型

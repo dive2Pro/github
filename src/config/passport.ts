@@ -1,8 +1,10 @@
 import passport from 'passport'
 import passportLocal from 'passport-local'
 import passportGithub from 'passport-github'
+import passportJWT from 'passport-jwt'
 import request = require('superagent')
 import User, { UserModel } from '../models/User'
+import { RequestHandler } from 'express'
 
 passport.serializeUser<any, any>((user, done) => {
     done(undefined, user.id)
@@ -116,7 +118,8 @@ passport.use(
                     user.profile.picture = avatar_url
                     user.profile.location = location
                     user.profile.website = html_url
-
+                    // TODO: 分析用户的repo, 检查有哪些 语言 是其使用的
+                    //       提供接口供其设置要关注的语言
                     user.save((err: Error) => {
                         cb(err, user)
                     })
@@ -125,3 +128,26 @@ passport.use(
         }
     )
 )
+
+const { Strategy: JWTStrategy, ExtractJwt } = passportJWT
+
+passport.use(
+    new JWTStrategy(
+        {
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            secretOrKey: 'your_jwt_secret'
+        },
+        function(jwtPayload, cb) {
+            // find the user in db if needed
+            return User.findById(jwtPayload.id)
+                .then(user => {
+                    return cb(undefined, user)
+                })
+                .catch(err => {
+                    return cb(err)
+                })
+        }
+    )
+)
+
+export const isAuthorized: RequestHandler = (req, res, next) => {}

@@ -1,7 +1,9 @@
-import express from 'express'
+import express, { RequestHandler } from 'express'
+import passport from 'passport'
+import expressJwt from 'express-jwt'
+import jwt from 'jsonwebtoken'
 import * as userControllers from './controllers/user'
 import * as trendingControllers from './controllers/trending'
-import passport from 'passport'
 const routes = express.Router()
 import * as repoControllers from './controllers/repo'
 
@@ -15,15 +17,43 @@ routes.get(
     '/login/github',
     passport.authenticate('github', {
         failureRedirect: '/api'
-    })
+    }),
+    function(req, res, next) {
+        if (!req.user) {
+            return res.status(401).send('User Not Authenticated')
+        }
+    }
 )
+
+const secretKey = 'my-secret'
+
+const authenticate = expressJwt({
+    secret: secretKey,
+    requestProperty: 'auth',
+    getToken(req) {
+        return req.headers['x-auth-token']
+    }
+})
+
+const generateToken: RequestHandler = (req, res, next) => {
+    req.token = jwt.sign(
+        {
+            id: req.user.id
+        },
+        secretKey
+    )
+    return next()
+}
+
 routes.get(
     '/return',
     passport.authenticate('github', {
         failureRedirect: '/api'
     }),
+    generateToken,
     (req, res) => {
-        return res.redirect(`http://localhost:3000/players/${req.user.id}`)
+        res.cookie('x-auth-token', `Bearer ${req.token}`)
+        return res.redirect(`http://localhost:3000/user/${req.user.id}`)
     }
 )
 

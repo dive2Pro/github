@@ -32,8 +32,6 @@ export let login: RequestHandler[] = [
                     return next(err)
                 }
 
-                console.log(req.user)
-                console.log(req.session)
                 res.status(200).json(user)
             })
         })(req, res, next)
