@@ -27,22 +27,30 @@ routes.get(
 
 const secretKey = 'my-secret'
 
-const authenticate = expressJwt({
-    secret: secretKey,
-    requestProperty: 'auth',
-    getToken(req) {
-        let authHeader = req.headers['x-auth-token']
-        if (authHeader) {
-            authHeader = decodeURIComponent(authHeader.toString())
-            if (authHeader.toString().split(' ')[0] === 'Bearer') {
-                return authHeader.toString().split(' ')[1]
-            }
-        } else if (req.query && req.query.token) {
-            return req.query.token
-        }
-        return undefined
-    }
-})
+const nothingMiddleware: RequestHandler = (req, res, next) => {
+    next()
+}
+
+// @ts-ignore
+const authenticate =
+    process.env.NODE_ENV === 'test'
+        ? nothingMiddleware
+        : expressJwt({
+              secret: secretKey,
+              requestProperty: 'auth',
+              getToken(req) {
+                  let authHeader = req.headers['x-auth-token']
+                  if (authHeader) {
+                      authHeader = decodeURIComponent(authHeader.toString())
+                      if (authHeader.toString().split(' ')[0] === 'Bearer') {
+                          return authHeader.toString().split(' ')[1]
+                      }
+                  } else if (req.query && req.query.token) {
+                      return req.query.token
+                  }
+                  return undefined
+              }
+          })
 
 const generateToken: RequestHandler = (req, res, next) => {
     req.token = jwt.sign(
@@ -75,7 +83,7 @@ routes.get('/repos/:id', repoControllers.repo)
 /**
  * trending
  */
-
+routes.get('/trending/:name', authenticate, trendingControllers.repoTrending)
 routes.get('/trending', authenticate, trendingControllers.trending)
 
 export default routes

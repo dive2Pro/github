@@ -73,10 +73,14 @@ async function queryTrending(lang: string, type: string) {
             })
         )
         console.log('save %s trending!', lang)
-        return results
+        return [body, results]
     } catch (e) {
         console.error('trending query count error: ', e)
     }
+}
+
+function dailyReposAnalysis(dayRepos: TrendingModel[]) {
+
 }
 
 export default function trigger(langs: string[]) {
@@ -85,8 +89,9 @@ export default function trigger(langs: string[]) {
             // .daily()
             .seconds(1)
             .times(1)
-            .run(function() {
-                queryTrending(s, this.repeatMode)
+            .run(async function() {
+                const [dayRepos] = await queryTrending(s, this.repeatMode)
+                dailyReposAnalysis(dayRepos)
             })
         return clear
     })
