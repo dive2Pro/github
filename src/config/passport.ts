@@ -54,8 +54,8 @@ passport.use(
 )
 
 const GithubStrategy = passportGithub.Strategy
-const CLIENT_ID = 'e4fc9e72fbe8f05e277c'
-const CLIENT_SECRET = '79d62014bded613e11df23ec0669b08c8904242b'
+const CLIENT_ID = process.env.CLIENT_ID
+const CLIENT_SECRET = process.env.CLIENT_SECRET
 
 passport.use(
     new GithubStrategy(
@@ -135,7 +135,7 @@ passport.use(
     new JWTStrategy(
         {
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: 'your_jwt_secret'
+            secretOrKey: process.env.JWT_SECRET
         },
         function(jwtPayload, cb) {
             // find the user in db if needed

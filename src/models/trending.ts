@@ -1,4 +1,4 @@
-import { Schema, Document, Error, model } from 'mongoose'
+import { Schema, Document, model } from 'mongoose'
 
 export type BuiltByModel = {
     username: string

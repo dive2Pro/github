@@ -25,7 +25,7 @@ routes.get(
     }
 )
 
-const secretKey = 'my-secret'
+const secretKey = process.env.AUTH_SECRET
 
 const nothingMiddleware: RequestHandler = (req, res, next) => {
     next()

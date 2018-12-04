@@ -1,3 +1,4 @@
+require('dotenv').config()
 import bodyParser from 'body-parser'
 import cookieParser from 'cookie-parser'
 import express, { ErrorRequestHandler } from 'express'
@@ -15,14 +16,14 @@ console.log(passportConfig)
 const app = express()
 const env = app.get('env')
 let router = ''
-let dbName = 'github'
+let dbName = process.env.DB_NAME
 if (env === 'test') {
     router = '/'
-    dbName = 'github_test'
+    dbName = process.env.DB_TEST_NAME
 } else {
     router = '/api'
 }
-const mongoUrl = 'mongodb://127.0.0.1:27017/'
+const mongoUrl = process.env.MONGO_PATH
 const mongoDB = mongoUrl + dbName
 
 mongoose
@@ -42,7 +43,7 @@ const pre_middleware = [
     cookieParser(),
     expressValidator(),
     expressSession({
-        secret: '-sec-ret',
+        secret: process.env.SESSION_SECRET,
         store: new MongoStore({
             url: mongoUrl,
             autoReconnect: true
@@ -62,7 +63,6 @@ app.all('*', (req, res, next) => {
     const method = req.method.toLowerCase()
     if (method === 'options') {
         return res.sendStatus(200)
-        // return res.status(204).setHeader('Content-Length', 0)
     }
     next()
 })
@@ -87,7 +87,7 @@ const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     }
 
     // 重定向到 system error 页面
-    return res.redirect(`http://localhost:3000/serverError`)
+    return res.redirect(`${process.env.UI_HOST}/serverError`)
 }
 app.use(errorHandler)
 export default app
