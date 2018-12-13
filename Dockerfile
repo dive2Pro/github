@@ -1,12 +1,12 @@
 FROM node:10
 
-WORKDIR ./app
+WORKDIR /usr/src/github
 
-COPY package*.json ./app
+COPY package*.json /usr/src/github
 
-RUN tyarn install
+RUN yarn install
 
-COPY . .
+COPY . /usr/src/github
 
 EXPOSE 3000
 
